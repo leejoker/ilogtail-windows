@@ -15,8 +15,13 @@
 #include "plugin/PluginRegistry.h"
 
 #include <dirent.h>
+#if defined(__linux__)
 #include <dlfcn.h>
 #include <unistd.h>
+#elif defined(_MSC_VER)
+#include <Windows.h>
+#include <io.h>
+#endif
 
 #include <cstdio>
 #include <cstdlib>

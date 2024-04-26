@@ -37,6 +37,20 @@ DEFINE_FLAG_INT32(config_update_interval, "second", 10);
 
 namespace logtail {
 
+#if defined(_MSC_VER)
+// 实现usleep
+static void usleep(unsigned long usec) {
+    HANDLE timer;
+    LARGE_INTEGER interval;
+    interval.QuadPart = (10 * usec);
+
+    timer = CreateWaitableTimer(NULL, TRUE, NULL);
+    SetWaitableTimer(timer, &interval, 0, NULL, NULL, 0);
+    WaitForSingleObject(timer, INFINITE);
+    CloseHandle(timer);
+}
+#endif
+
 void CommonConfigProvider::Init(const string& dir) {
     ConfigProvider::Init(dir);
 

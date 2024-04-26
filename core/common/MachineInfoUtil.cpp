@@ -164,31 +164,31 @@ std::string GetHostName() {
     return std::string(hostname);
 }
 
-std::list<std::string> GetNicIpv4IPList() {
-    struct ifaddrs* ifAddrStruct = NULL;
-    void* tmpAddrPtr = NULL;
-    std::list<std::string> ipList;
-    getifaddrs(&ifAddrStruct);
-    for (struct ifaddrs* ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next) {
-        if (ifa->ifa_addr == NULL) {
-            continue;
-        }
-        if (ifa->ifa_addr->sa_family == AF_INET) {
-            tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
-            char addressBuffer[INET_ADDRSTRLEN] = "";
-            inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-            std::string ip(addressBuffer);
-            // The loopback on most Linux distributions is lo, however it is not portable. For example loopback in OSX
-            // is lo0.
-            if (0 == strcmp("lo", ifa->ifa_name) || ip.empty() || StartWith(ip, "127.")) {
-                continue;
-            }
-            ipList.emplace_back(std::move(ip));
-        }
-    }
-    freeifaddrs(ifAddrStruct);
-    return ipList;
-}
+//std::list<std::string> GetNicIpv4IPList() {
+//    struct ifaddrs* ifAddrStruct = NULL;
+//    void* tmpAddrPtr = NULL;
+//    std::list<std::string> ipList;
+//    getifaddrs(&ifAddrStruct);
+//    for (struct ifaddrs* ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next) {
+//        if (ifa->ifa_addr == NULL) {
+//            continue;
+//        }
+//        if (ifa->ifa_addr->sa_family == AF_INET) {
+//            tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
+//            char addressBuffer[INET_ADDRSTRLEN] = "";
+//            inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+//            std::string ip(addressBuffer);
+//            // The loopback on most Linux distributions is lo, however it is not portable. For example loopback in OSX
+//            // is lo0.
+//            if (0 == strcmp("lo", ifa->ifa_name) || ip.empty() || StartWith(ip, "127.")) {
+//                continue;
+//            }
+//            ipList.emplace_back(std::move(ip));
+//        }
+//    }
+//    freeifaddrs(ifAddrStruct);
+//    return ipList;
+//}
 
 std::string GetHostIpByHostName() {
     std::string hostname = GetHostName();

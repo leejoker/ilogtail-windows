@@ -22,6 +22,7 @@
 #include "common/RuntimeUtil.h"
 #include "common/TimeUtil.h"
 #include "common/ErrorUtil.h"
+#include "common/EncodingConverter.h"
 #include "logger/Logger.h"
 #include "sender/Sender.h"
 #include "config_manager/ConfigManager.h"

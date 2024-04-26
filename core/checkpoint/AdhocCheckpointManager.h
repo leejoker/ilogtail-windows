@@ -16,9 +16,20 @@
 
 #pragma once
 #include <unordered_map>
+
 #include "AdhocJobCheckpoint.h"
 
+#define O_RDONLY 00
+#define O_WRONLY 01
+#define O_RDWR 02
+
+typedef __int64 ssize_t;
+
 namespace logtail {
+
+#if defined(_MSC_VER)
+static ssize_t pread(int fd, void* buf, size_t count, uint64_t offset);
+#endif
 
 class AdhocCheckpointManager {
 private:

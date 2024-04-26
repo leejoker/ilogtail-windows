@@ -20,6 +20,7 @@
 
 #include <thread>
 
+#include <direct.h>
 #include "app_config/AppConfig.h"
 #include "checkpoint/CheckPointManager.h"
 #include "common/CrashBackTraceUtil.h"
@@ -327,7 +328,8 @@ void Application::Exit() {
 
 
 #if defined(_MSC_VER)
-    ReleaseWindowsSignalObject();
+//    ReleaseWindowsSignalObject();
+    exit(0);
 #endif
     LOG_INFO(sLogger, ("exit", "bye!"));
     exit(0);

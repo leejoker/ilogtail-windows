@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "EncodingConverter.h"
+
 #include "LogtailAlarm.h"
 #include "logger/Logger.h"
 #if defined(__linux__)
@@ -118,17 +119,17 @@ size_t EncodingConverter::ConvertGbk2Utf8(
         return len;
     }
     char* des = desOut;
-    len = desLength - 1;
+    size_t len = desLength - 1;
     des[len] = '\0';
     int outLen = WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR)wszUtf8, wcLen, des, len, NULL, NULL);
-    if (outLen) == 0) {
-            LOG_ERROR(sLogger,
-                      ("convert GBK to UTF8 fail, WideCharToMultiByte error",
-                       GetLastError())("sample", std::string(src, 0, 1024)));
-            delete[] wszUtf8;
-            delete[] des;
-            return 0;
-        }
+    if (outLen == 0) {
+        LOG_ERROR(sLogger,
+                  ("convert GBK to UTF8 fail, WideCharToMultiByte error", GetLastError())("sample",
+                                                                                          std::string(src, 0, 1024)));
+        delete[] wszUtf8;
+        delete[] des;
+        return 0;
+    }
     delete[] wszUtf8;
     return outLen;
 #endif
@@ -179,7 +180,7 @@ std::string EncodingConverter::FromACPToUTF8(const std::string& s) const {
 
     auto input = const_cast<char*>(s.c_str());
     auto inputLen = s.length();
-    std::vector<size_t> ignore;
+    std::vector<long> ignore;
 
     size_t outputLen = ConvertGbk2Utf8(input, &inputLen, nullptr, 0, ignore);
     if (outputLen == 0) {

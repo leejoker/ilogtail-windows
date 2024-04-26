@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "RandomUtil.h"
+#include "UUIDUtil.h"
 #include <sstream>
 #if defined(__linux__)
 #include <uuid/uuid.h>

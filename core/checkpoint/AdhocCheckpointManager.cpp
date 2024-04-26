@@ -15,13 +15,14 @@
  */
 
 #include "AdhocCheckpointManager.h"
+
 #include "common/FileSystemUtil.h"
 #include "common/Flags.h"
-#include "logger/Logger.h"
-#include "monitor/LogtailAlarm.h"
+#include "common/HashUtil.h"
 #include "common/Thread.h"
 #include "fuse/ulogfslib_file.h"
-#include "common/HashUtil.h"
+#include "logger/Logger.h"
+#include "monitor/LogtailAlarm.h"
 
 DEFINE_FLAG_INT32(adhoc_checkpoint_dump_thread_wait_interval, "microseconds", 5 * 1000);
 
@@ -34,6 +35,31 @@ DEFINE_FLAG_STRING(adhoc_check_point_file_dir, "", "C:\\LogtailData\\logtail_adh
 #endif
 
 namespace logtail {
+
+#if defined(_MSC_VER)
+static ssize_t pread(int fd, void* buf, size_t count, uint64_t offset) {
+    long unsigned int read_bytes = 0;
+
+    OVERLAPPED overlapped;
+    memset(&overlapped, 0, sizeof(OVERLAPPED));
+
+    overlapped.OffsetHigh = (uint32_t)((offset & 0xFFFFFFFF00000000LL) >> 32);
+    overlapped.Offset = (uint32_t)(offset & 0xFFFFFFFFLL);
+
+    HANDLE file = (HANDLE)_get_osfhandle(fd);
+    SetLastError(0);
+    bool RF = ReadFile(file, buf, count, &read_bytes, &overlapped);
+
+    // For some reason it errors when it hits end of file so we don't want to check that
+    if ((RF == 0) && GetLastError() != ERROR_HANDLE_EOF) {
+        errno = GetLastError();
+        // printf ("Error reading file : %d\n", GetLastError());
+        return -1;
+    }
+
+    return read_bytes;
+}
+#endif
 
 AdhocJobCheckpointPtr AdhocCheckpointManager::GetAdhocJobCheckpoint(const std::string& jobName) {
     AdhocJobCheckpointPtr jobCheckpoint = nullptr;

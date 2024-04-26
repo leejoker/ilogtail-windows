@@ -18,6 +18,7 @@
 
 #include "application/Application.h"
 #include "common/Flags.h"
+#include "common/version.h"
 #include "logger/Logger.h"
 #include "monitor/LogtailAlarm.h"
 

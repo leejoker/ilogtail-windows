@@ -60,11 +60,11 @@ set(DEP_NAME_LIST
         crypto
         leveldb
         uuid
-        )
+)
 
 if (NOT NO_TCMALLOC)
     list(APPEND DEP_NAME_LIST "tcmalloc") # (gperftools)
-endif()
+endif ()
 
 if (MSVC)
     if (NOT DEFINED unwind_${INCLUDE_DIR_SUFFIX})
@@ -144,7 +144,7 @@ endmacro()
 
 # tcmalloc (gperftools)
 macro(link_tcmalloc target_name)
-    if(NOT NO_TCMALLOC)
+    if (NOT NO_TCMALLOC)
         if (tcmalloc_${LINK_OPTION_SUFFIX})
             target_link_libraries(${target_name} "${tcmalloc_${LINK_OPTION_SUFFIX}}")
         elseif (UNIX)
@@ -221,7 +221,7 @@ macro(link_boost target_name)
                 "${boost_${LIBRARY_DIR_SUFFIX}}/libboost_system.a"
                 "${boost_${LIBRARY_DIR_SUFFIX}}/libboost_filesystem.a"
                 "${boost_${LIBRARY_DIR_SUFFIX}}/libboost_chrono.a"
-                )
+        )
     elseif (MSVC)
         if (NOT DEFINED Boost_FOUND)
             set(Boost_USE_STATIC_LIBS ON)
@@ -360,10 +360,10 @@ endmacro()
 
 # asan for debug
 macro(link_asan target_name)
-    if(CMAKE_BUILD_TYPE MATCHES Debug)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
         target_compile_options(${target_name} PUBLIC -fsanitize=address)
         target_link_options(${target_name} PUBLIC -fsanitize=address -static-libasan)
-    endif()
+    endif ()
 endmacro()
 
 # uuid

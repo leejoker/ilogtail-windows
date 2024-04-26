@@ -20,6 +20,7 @@
 #include <fnmatch.h>
 #endif
 
+#include "common/EncodingConverter.h"
 #include "common/FileSystemUtil.h"
 #include "common/LogtailCommonFlags.h"
 #include "common/ParamExtractor.h"

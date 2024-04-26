@@ -56,12 +56,30 @@ if (UNIX)
     string(REPLACE "-O3" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 elseif (MSVC)
     add_definitions(-DNOMINMAX)
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /MP /Zi")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /MP /Zi /std:c++17 /Zc:__cplusplus")
     set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
     set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /MP")
 endif ()
+
+set(CompilerFlags
+        CMAKE_CXX_FLAGS
+        CMAKE_CXX_FLAGS_DEBUG
+        CMAKE_CXX_FLAGS_RELEASE
+        CMAKE_CXX_FLAGS_MINSIZEREL
+        CMAKE_CXX_FLAGS_RELWITHDEBINFO
+        CMAKE_C_FLAGS
+        CMAKE_C_FLAGS_DEBUG
+        CMAKE_C_FLAGS_RELEASE
+        CMAKE_C_FLAGS_MINSIZEREL
+        CMAKE_C_FLAGS_RELWITHDEBINFO
+)
+foreach(CompilerFlag ${CompilerFlags})
+    string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+    set(${CompilerFlag} "${${CompilerFlag}}" CACHE STRING "msvc compiler flags" FORCE)
+    message("MSVC flags: ${CompilerFlag}:${${CompilerFlag}}")
+endforeach()
 
 # To be compatible with low version Linux.
 if (ENABLE_COMPATIBLE_MODE)
@@ -82,24 +100,24 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake)
 
 # Subdirectories (modules).
 set(SUB_DIRECTORIES_LIST
-        aggregator application app_config checkpoint common config config/provider config/watcher config_manager config_server_pb 
-        container_manager controller event event_handler event_listener file_server flusher go_pipeline helper input log_pb logger 
-        models monitor parser pipeline plugin plugin/creator plugin/instance plugin/interface polling processor processor/daemon 
+        aggregator application app_config checkpoint common config config/provider config/watcher config_manager config_server_pb
+        container_manager controller event event_handler event_listener file_server flusher go_pipeline helper input log_pb logger
+        models monitor parser pipeline plugin plugin/creator plugin/instance plugin/interface polling processor processor/daemon
         profile_sender reader sdk sender sls_control fuse
-        )
+)
 if (LINUX)
     set(SUB_DIRECTORIES_LIST ${SUB_DIRECTORIES_LIST} observer spl)
     if (ENABLE_ENTERPRISE)
         set(SUB_DIRECTORIES_LIST ${SUB_DIRECTORIES_LIST} shennong streamlog)
-    endif()
-elseif(MSVC)
+    endif ()
+elseif (MSVC)
     if (ENABLE_ENTERPRISE)
         set(SUB_DIRECTORIES_LIST ${SUB_DIRECTORIES_LIST} daemon)
-    endif()
+    endif ()
 endif ()
 if (ENABLE_ENTERPRISE)
     set(SUB_DIRECTORIES_LIST ${SUB_DIRECTORIES_LIST} config_sdk)
-endif()
+endif ()
 
 # Collect source files for UT.
 set(ALL_SOURCE_FILES "")
@@ -130,7 +148,7 @@ if (BUILD_LOGTAIL)
         elseif (MSVC)
             add_executable(${LOGTAIL_TARGET} logtail_windows.cpp)
         endif ()
-    endif()
+    endif ()
     target_link_libraries(${LOGTAIL_TARGET} application)
     if (ENABLE_COMPATIBLE_MODE)
         target_link_libraries(${LOGTAIL_TARGET} rt -static-libstdc++ -static-libgcc)
@@ -138,7 +156,7 @@ if (BUILD_LOGTAIL)
     if (ENABLE_STATIC_LINK_CRT)
         target_link_libraries(${LOGTAIL_TARGET} -static-libstdc++ -static-libgcc)
     endif ()
-endif()
+endif ()
 
 if (BUILD_LOGTAIL_SHARED_LIBRARY)
     if (ENABLE_ENTERPRISE)
@@ -153,7 +171,7 @@ if (BUILD_LOGTAIL_SHARED_LIBRARY)
         elseif (MSVC)
             add_library(${LOGTAIL_TARGET} SHARED logtail_windows.cpp)
         endif ()
-    endif()
+    endif ()
     target_link_libraries(${LOGTAIL_TARGET} application)
     if (ENABLE_COMPATIBLE_MODE)
         target_link_libraries(${LOGTAIL_TARGET} rt -static-libstdc++ -static-libgcc)
