@@ -22,16 +22,16 @@ goto begin
 set ILOGTAIL_PLUGIN_SRC_PATH="%P1Path%"
 set ILOGTAIL_PLUGIN_SRC_UNIX_PATH=%ILOGTAIL_PLUGIN_SRC_PATH:\=/%
 REM Change to where boost_1_68_0 locates
-set BOOST_ROOT=C:\workspace\boost_1_68_0
+set BOOST_ROOT=E:\boost_1_68_0
 REM Change to where ilogtail-deps.windows-x64 locates
-set ILOGTAIL_DEPS_PATH=C:\workspace\ilogtail-deps.windows-x64
+set ILOGTAIL_DEPS_PATH=E:\projects\c\ilogtail\ilogtail-deps
 set ILOGTAIL_DEPS_PATH=%ILOGTAIL_DEPS_PATH:\=/%
 REM Change to where cmake locates
-set CMAKE_BIN="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake"
+set CMAKE_BIN="D:\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake"
 REM Change to where devenv locates
-set DEVENV_BIN="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\devenv.com"
+set DEVENV_BIN="D:\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.com"
 REM Change to where mingw locates
-set MINGW_PATH=C:\workspace\mingw64\bin
+set MINGW_PATH=D:\scoop\apps\msys2\current\mingw64
 
 set OUTPUT_DIR=%ILOGTAIL_PLUGIN_SRC_PATH%\output
 set OUTPUT_UNIX_DIR=%OUTPUT_DIR:\=/%
@@ -54,7 +54,7 @@ cd %ILOGTAIL_PLUGIN_SRC_PATH%\core
 IF exist build ( rd /s /q build )
 mkdir build
 cd build
-%CMAKE_BIN% -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DLOGTAIL_VERSION=%ILOGTAIL_VERSION% -DDEPS_ROOT=%ILOGTAIL_DEPS_PATH% ..
+%CMAKE_BIN% -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release -DLOGTAIL_VERSION=%ILOGTAIL_VERSION% -DDEPS_ROOT=%ILOGTAIL_DEPS_PATH% ..
 if not %ERRORLEVEL% == 0 (
     echo Run cmake failed.
     goto quit
@@ -80,7 +80,7 @@ REM Build plugins (PluginBase.dll, PluginBase.h)
 echo Begin to build plugins...
 IF exist %OUTPUT_DIR% ( rd /s /q %OUTPUT_DIR% )
 mkdir %OUTPUT_DIR%
-xcopy /Y %ILOGTAIL_CORE_BUILD_PATH%\plugin\Release\PluginAdapter.dll %ILOGTAIL_PLUGIN_SRC_PATH%\pkg\logtail
+xcopy /Y %ILOGTAIL_CORE_BUILD_PATH%\go_pipeline\Release\PluginAdapter.dll %ILOGTAIL_PLUGIN_SRC_PATH%\pkg\logtail
 set LDFLAGS="-X "github.com/alibaba/ilogtail/pluginmanager.BaseVersion=%ILOGTAIL_VERSION%""
 go build -mod=mod -buildmode=c-shared -ldflags=%LDFLAGS% -o %OUTPUT_UNIX_DIR%/PluginBase.dll %ILOGTAIL_PLUGIN_SRC_UNIX_PATH%/plugin_main
 if not %ERRORLEVEL% == 0 (
