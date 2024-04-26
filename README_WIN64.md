@@ -15,8 +15,7 @@
 * [cmake](https://github.com/Kitware/CMake/releases/download/v3.29.2/cmake-3.29.2-windows-x86_64.zip)
 
 # 步骤说明
-
-1. 编译protobuf
+#### 1. 编译protobuf
 
 ```shell
 git clone https://github.com/protocolbuffers/protobuf.git
@@ -25,16 +24,15 @@ git submodule update --init --recursive
 ```
 
 使用cmake-gui转换为当前Visual Studio的项目，然后进行编译。
+#### 2. 替换ilogtail-deps
 
-2. 替换ilogtail-deps
+使用Release目录下的lib文件替换ilogtail-deps\lib目录下的同名文件。  
+使用protobuf\src\google目录替换ilogtail-deps/include中的同名目录。  
+使用protobuf\third_party\googletest\googletest\include\gtest替换ilogtail-deps/include中的同名目录。    
 
-使用Release目录下的lib文件替换ilogtail-deps\lib目录下的同名文件。
-使用protobuf\src\google目录替换ilogtail-deps/include中的同名目录
-使用protobuf\third_party\googletest\googletest\include\gtest替换ilogtail-deps/include中的同名目录
-
-3. 根据[官方文档](https://ilogtail.gitbook.io/ilogtail-docs/installation/sources/build)替换windows64_build.bat中的变量
-4. 执行编译脚本
-5. 如果遇到RuntimeLibrary报错问题，请将按照以下进行替换，重新编译：
+#### 3. 根据[官方文档](https://ilogtail.gitbook.io/ilogtail-docs/installation/sources/build)替换windows64_build.bat中的变量
+#### 4. 执行编译脚本
+#### 5. 如果遇到RuntimeLibrary报错问题，请将按照以下进行替换，重新编译：
 ```xml
 <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
 ```
