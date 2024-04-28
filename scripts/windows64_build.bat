@@ -22,16 +22,16 @@ goto begin
 set ILOGTAIL_PLUGIN_SRC_PATH="%P1Path%"
 set ILOGTAIL_PLUGIN_SRC_UNIX_PATH=%ILOGTAIL_PLUGIN_SRC_PATH:\=/%
 REM Change to where boost_1_68_0 locates
-set BOOST_ROOT=E:\boost_1_68_0
+set BOOST_ROOT=C:\workspace\boost_1_68_0
 REM Change to where ilogtail-deps.windows-x64 locates
-set ILOGTAIL_DEPS_PATH=E:\projects\c\ilogtail\ilogtail-deps
+set ILOGTAIL_DEPS_PATH=C:\workspace\ilogtail-deps.windows-x64
 set ILOGTAIL_DEPS_PATH=%ILOGTAIL_DEPS_PATH:\=/%
 REM Change to where cmake locates
-set CMAKE_BIN="D:\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake"
+set CMAKE_BIN="C:\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake"
 REM Change to where devenv locates
-set DEVENV_BIN="D:\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.com"
+set DEVENV_BIN="C:\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.com"
 REM Change to where mingw locates
-set MINGW_PATH=D:\scoop\apps\msys2\current\mingw64
+set MINGW_PATH=C:\workspace\mingw64\bin
 
 set OUTPUT_DIR=%ILOGTAIL_PLUGIN_SRC_PATH%\output
 set OUTPUT_UNIX_DIR=%OUTPUT_DIR:\=/%
