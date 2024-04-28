@@ -56,30 +56,13 @@ if (UNIX)
     string(REPLACE "-O3" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 elseif (MSVC)
     add_definitions(-DNOMINMAX)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /MP /Zi /std:c++17 /Zc:__cplusplus")
     set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
     set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /MP")
 endif ()
-
-set(CompilerFlags
-        CMAKE_CXX_FLAGS
-        CMAKE_CXX_FLAGS_DEBUG
-        CMAKE_CXX_FLAGS_RELEASE
-        CMAKE_CXX_FLAGS_MINSIZEREL
-        CMAKE_CXX_FLAGS_RELWITHDEBINFO
-        CMAKE_C_FLAGS
-        CMAKE_C_FLAGS_DEBUG
-        CMAKE_C_FLAGS_RELEASE
-        CMAKE_C_FLAGS_MINSIZEREL
-        CMAKE_C_FLAGS_RELWITHDEBINFO
-)
-foreach(CompilerFlag ${CompilerFlags})
-    string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
-    set(${CompilerFlag} "${${CompilerFlag}}" CACHE STRING "msvc compiler flags" FORCE)
-    message("MSVC flags: ${CompilerFlag}:${${CompilerFlag}}")
-endforeach()
 
 # To be compatible with low version Linux.
 if (ENABLE_COMPATIBLE_MODE)

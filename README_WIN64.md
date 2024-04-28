@@ -34,42 +34,4 @@ git submodule update --init --recursive
 
 #### 3. 根据[官方文档](https://ilogtail.gitbook.io/ilogtail-docs/installation/sources/build)替换windows64_build.bat中的变量
 
-#### 4. 执行编译脚本
-
-#### 5. 如果遇到RuntimeLibrary报错问题，请将按照以下进行替换（vcxproj文件）：
-
-```xml
-
-<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-```
-
-替换为：
-
-```xml
-
-<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-```
-
-注释掉windows64_build.bat脚本中删除build目录和生成vs项目的代码，重新执行编译脚本。
-
-```bat
-echo begin to compile core
-cd %ILOGTAIL_PLUGIN_SRC_PATH%\core
-@REM 注释删除build目录
-@REM IF exist build ( rd /s /q build )
-@REM mkdir build
-cd build
-@REM 注释项目生成
-@REM %CMAKE_BIN% -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release -DLOGTAIL_VERSION=%ILOGTAIL_VERSION% -DDEPS_ROOT=%ILOGTAIL_DEPS_PATH% ..
-@REM if not %ERRORLEVEL% == 0 (
-@REM     echo Run cmake failed.
-@REM     goto quit
-@REM )
-%DEVENV_BIN% logtail.sln /Build "Release|x64" 1>build.stdout 2>build.stderr
-if not %ERRORLEVEL% == 0 (
-    echo Build iLogtail source failed.
-    goto quit
-)
-```
-
-补充说明：编译go的部分因为启用了CGO，建议在msys2中编译。
+#### 4. 在msys2中执行编译脚本
