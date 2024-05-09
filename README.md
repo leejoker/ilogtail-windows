@@ -1,5 +1,3 @@
-# [Windows编译说明](README_WIN64.md)
-
 # Alibaba iLogtail - Fast and Lightweight Observability Data Collector | [中文用户手册](https://ilogtail.gitbook.io/ilogtail-docs/)
 
 <img src="https://sls-opensource.oss-us-west-1.aliyuncs.com/ilogtail/ilogtail.svg?versionId=CAEQMxiBgIDEmq.m6BciIDkzNmE2OWU4NzIwZjQ1Y2ZiYmIxZjhiYjMyNmQxZTdi" alt="ilogtail logo" height="150px" align="right" />
@@ -80,6 +78,8 @@ Our official **User Manual** is located here:
 [Developer Guide](https://ilogtail.gitbook.io/ilogtail-docs/developer-guide/)
 
 [Benchmark](https://ilogtail.gitbook.io/ilogtail-docs/benchmark/)
+
+[Windows Compile Guide](README_WIN64.md)
 
 ## Contribution
 
