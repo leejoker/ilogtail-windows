@@ -1696,7 +1696,8 @@ void LogFileReader::ReadUTF8(LogBuffer& logBuffer, int64_t end, bool& moreData, 
         if (READ_BYTE < lastCacheSize) {
             READ_BYTE = lastCacheSize; // this should not happen, just avoid READ_BYTE >= 0 theoratically
         }
-        StringBuffer stringMemory = logBuffer.sourcebuffer->AllocateStringBuffer(READ_BYTE); // allocate modifiable buffer
+        StringBuffer stringMemory
+            = logBuffer.sourcebuffer->AllocateStringBuffer(READ_BYTE); // allocate modifiable buffer
         if (lastCacheSize) {
             READ_BYTE -= lastCacheSize; // reserve space to copy from cache if needed
         }
@@ -2247,45 +2248,47 @@ StringBuffer* BaseLineParse::GetStringBuffer() {
     return &mStringBuffer;
 }
 
+LineInfo createLineInfo(StringView data, int begin, int end, int rollbackLineFeedCount, bool fullLine) {
+    LineInfo lineInfo;
+    lineInfo.data = data;
+    lineInfo.lineBegin = begin;
+    lineInfo.lineEnd = end;
+    lineInfo.rollbackLineFeedCount = rollbackLineFeedCount;
+    lineInfo.fullLine = fullLine;
+    return lineInfo;
+}
+
 LineInfo RawTextParser::GetLastLine(StringView buffer,
-                                   int32_t end,
-                                   size_t protocolFunctionIndex,
-                                   bool needSingleLine,
-                                   std::vector<BaseLineParse*>* lineParsers) {
+                                    int32_t end,
+                                    size_t protocolFunctionIndex,
+                                    bool needSingleLine,
+                                    std::vector<BaseLineParse*>* lineParsers) {
     if (end == 0) {
-        return {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
+        return createLineInfo(StringView(), 0, 0, 0, false);
     }
     if (protocolFunctionIndex != 0) {
-        return {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
+        return createLineInfo(StringView(), 0, 0, 0, false);
     }
 
     for (int32_t begin = end; begin > 0; --begin) {
         if (begin == 0 || buffer[begin - 1] == '\n') {
-            return {.data = StringView(buffer.data() + begin, end - begin),
-                    .lineBegin = begin,
-                    .lineEnd = end,
-                    .rollbackLineFeedCount = 1,
-                    .fullLine = true};
+            return createLineInfo(StringView(buffer.data() + begin, end - begin), begin, end, 1, true);
         }
     }
-    return {.data = StringView(buffer.data(), end),
-            .lineBegin = 0,
-            .lineEnd = end,
-            .rollbackLineFeedCount = 1,
-            .fullLine = true};
+    return createLineInfo(StringView(buffer.data(), end), 0, end, 1, true);
 }
 
 LineInfo DockerJsonFileParser::GetLastLine(StringView buffer,
-                                          int32_t end,
-                                          size_t protocolFunctionIndex,
-                                          bool needSingleLine,
-                                          std::vector<BaseLineParse*>* lineParsers) {
+                                           int32_t end,
+                                           size_t protocolFunctionIndex,
+                                           bool needSingleLine,
+                                           std::vector<BaseLineParse*>* lineParsers) {
     if (end == 0) {
-        return {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
+        return createLineInfo(StringView(), 0, 0, 0, false);
     }
     if (protocolFunctionIndex == 0) {
         // 异常情况, DockerJsonFileParse不允许在最后一个解析器
-        return {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
+        return createLineInfo(StringView(), 0, 0, 0, false);
     }
 
     size_t nextProtocolFunctionIndex = protocolFunctionIndex - 1;
@@ -2354,16 +2357,16 @@ bool DockerJsonFileParser::parseLine(LineInfo rawLine, LineInfo& paseLine) {
 }
 
 LineInfo ContainerdTextParser::GetLastLine(StringView buffer,
-                                          int32_t end,
-                                          size_t protocolFunctionIndex,
-                                          bool needSingleLine,
-                                          std::vector<BaseLineParse*>* lineParsers) {
+                                           int32_t end,
+                                           size_t protocolFunctionIndex,
+                                           bool needSingleLine,
+                                           std::vector<BaseLineParse*>* lineParsers) {
     if (end == 0) {
-        return {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
+        return createLineInfo(StringView(), 0, 0, 0, false);
     }
     if (protocolFunctionIndex == 0) {
         // 异常情况, DockerJsonFileParse不允许在最后一个解析器
-        return {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
+        return createLineInfo(StringView(), 0, 0, 0, false);
     }
     LineInfo finalLine;
     finalLine.fullLine = false;
