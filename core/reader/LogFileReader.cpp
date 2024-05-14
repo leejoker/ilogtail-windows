@@ -2292,8 +2292,7 @@ LineInfo DockerJsonFileParser::GetLastLine(StringView buffer,
     }
 
     size_t nextProtocolFunctionIndex = protocolFunctionIndex - 1;
-    LineInfo finalLine
-        = {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
+    LineInfo finalLine = createLineInfo(StringView(), 0, 0, 0, false);
     while (!finalLine.fullLine) {
         LineInfo rawLine = (*lineParsers)[nextProtocolFunctionIndex]->GetLastLine(
             buffer, end, nextProtocolFunctionIndex, needSingleLine, lineParsers);
@@ -2301,8 +2300,7 @@ LineInfo DockerJsonFileParser::GetLastLine(StringView buffer,
             rawLine.data = StringView(rawLine.data.data(), rawLine.data.size() - 1);
         }
 
-        LineInfo line
-            = {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
+        LineInfo line = createLineInfo(StringView(), 0, 0, 0, false);
         parseLine(rawLine, line);
         finalLine.data = line.data;
         finalLine.fullLine = line.fullLine;
@@ -2370,8 +2368,7 @@ LineInfo ContainerdTextParser::GetLastLine(StringView buffer,
         // 异常情况, DockerJsonFileParse不允许在最后一个解析器
         return createLineInfo(StringView(), 0, 0, 0, false);
     }
-    LineInfo finalLine
-        = {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
+    LineInfo finalLine = createLineInfo(StringView(), 0, 0, 0, false);
     // 跳过最后的连续P
     size_t nextProtocolFunctionIndex = protocolFunctionIndex - 1;
 
@@ -2382,8 +2379,7 @@ LineInfo ContainerdTextParser::GetLastLine(StringView buffer,
             rawLine.data = StringView(rawLine.data.data(), rawLine.data.size() - 1);
         }
 
-        LineInfo line
-            = {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
+        LineInfo line = createLineInfo(StringView(), 0, 0, 0, false);
         parseLine(rawLine, line);
         // containerd 不需要外层协议的 dataRaw
         finalLine.data = line.data;
@@ -2417,8 +2413,7 @@ LineInfo ContainerdTextParser::GetLastLine(StringView buffer,
             break;
         }
 
-        LineInfo previousLine
-            = {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
+        LineInfo previousLine = createLineInfo(StringView(), 0, 0, 0, false);
         LineInfo rawLine = (*lineParsers)[nextProtocolFunctionIndex]->GetLastLine(
             buffer, finalLine.lineBegin - 1, nextProtocolFunctionIndex, needSingleLine, lineParsers);
         if (rawLine.data.back() == '\n') {
