@@ -2292,7 +2292,8 @@ LineInfo DockerJsonFileParser::GetLastLine(StringView buffer,
     }
 
     size_t nextProtocolFunctionIndex = protocolFunctionIndex - 1;
-    LineInfo finalLine;
+    LineInfo finalLine
+        = {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
     while (!finalLine.fullLine) {
         LineInfo rawLine = (*lineParsers)[nextProtocolFunctionIndex]->GetLastLine(
             buffer, end, nextProtocolFunctionIndex, needSingleLine, lineParsers);
@@ -2300,7 +2301,8 @@ LineInfo DockerJsonFileParser::GetLastLine(StringView buffer,
             rawLine.data = StringView(rawLine.data.data(), rawLine.data.size() - 1);
         }
 
-        LineInfo line;
+        LineInfo line
+            = {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
         parseLine(rawLine, line);
         finalLine.data = line.data;
         finalLine.fullLine = line.fullLine;
@@ -2368,8 +2370,8 @@ LineInfo ContainerdTextParser::GetLastLine(StringView buffer,
         // 异常情况, DockerJsonFileParse不允许在最后一个解析器
         return createLineInfo(StringView(), 0, 0, 0, false);
     }
-    LineInfo finalLine;
-    finalLine.fullLine = false;
+    LineInfo finalLine
+        = {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
     // 跳过最后的连续P
     size_t nextProtocolFunctionIndex = protocolFunctionIndex - 1;
 
@@ -2380,7 +2382,8 @@ LineInfo ContainerdTextParser::GetLastLine(StringView buffer,
             rawLine.data = StringView(rawLine.data.data(), rawLine.data.size() - 1);
         }
 
-        LineInfo line;
+        LineInfo line
+            = {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
         parseLine(rawLine, line);
         // containerd 不需要外层协议的 dataRaw
         finalLine.data = line.data;
@@ -2414,7 +2417,8 @@ LineInfo ContainerdTextParser::GetLastLine(StringView buffer,
             break;
         }
 
-        LineInfo previousLine;
+        LineInfo previousLine
+            = {.data = StringView(), .lineBegin = 0, .lineEnd = 0, .rollbackLineFeedCount = 0, .fullLine = false};
         LineInfo rawLine = (*lineParsers)[nextProtocolFunctionIndex]->GetLastLine(
             buffer, finalLine.lineBegin - 1, nextProtocolFunctionIndex, needSingleLine, lineParsers);
         if (rawLine.data.back() == '\n') {
@@ -2494,6 +2498,56 @@ void ContainerdTextParser::parseLine(LineInfo rawLine, LineInfo& paseLine) {
         paseLine.data = StringView(pch3 + 1, lineEnd - pch3 - 1);
         return;
     }
+}
+
+void LogFileReader::SetEventGroupMetaAndTag(PipelineEventGroup& group) {
+    // we store source-specific info with fixed key in metadata
+    switch (mFileLogFormat) {
+        case LogFormat::DOCKER_JSON_FILE:
+            group.SetMetadataNoCopy(EventGroupMetaKey::LOG_FORMAT, ProcessorParseContainerLogNative::DOCKER_JSON_FILE);
+            break;
+        case LogFileReader::LogFormat::CONTAINERD_TEXT:
+            group.SetMetadataNoCopy(EventGroupMetaKey::LOG_FORMAT, ProcessorParseContainerLogNative::CONTAINERD_TEXT);
+            break;
+        default:
+            break;
+    }
+    bool isContainerLog = mFileLogFormat == LogFormat::DOCKER_JSON_FILE || mFileLogFormat == LogFormat::CONTAINERD_TEXT;
+    if (!isContainerLog) {
+        group.SetMetadata(EventGroupMetaKey::LOG_FILE_PATH, GetConvertedPath());
+        group.SetMetadata(EventGroupMetaKey::LOG_FILE_PATH_RESOLVED, GetHostLogPath());
+        group.SetMetadata(EventGroupMetaKey::LOG_FILE_INODE, ToString(GetDevInode().inode));
+    }
+    group.SetMetadata(EventGroupMetaKey::SOURCE_ID, ToString(GetSourceId()));
+    group.SetMetadata(EventGroupMetaKey::TOPIC, GetTopicName());
+    group.SetMetadata(EventGroupMetaKey::LOGGROUP_KEY, ToString(GetLogGroupKey()));
+
+    // for source-specific info without fixed key, we store them in tags directly
+    // for log, these includes:
+    // 1. extra topic
+    // 2. external k8s env/label tag
+    // 3. inode (this is special, currently it is in both metadata and tag, since it is not a default tag; later on, it
+    // should be controlled by tag processor)
+    const std::vector<sls_logs::LogTag>& extraTags = GetExtraTags();
+    for (size_t i = 0; i < extraTags.size(); ++i) {
+        group.SetTag(extraTags[i].key(), extraTags[i].value());
+    }
+}
+
+PipelineEventGroup LogFileReader::GenerateEventGroup(LogFileReaderPtr reader, LogBuffer* logBuffer) {
+    PipelineEventGroup group{std::shared_ptr<SourceBuffer>(std::move(logBuffer->sourcebuffer))};
+    reader->SetEventGroupMetaAndTag(group);
+
+    LogEvent* event = group.AddLogEvent();
+    time_t logtime = time(nullptr);
+    if (AppConfig::GetInstance()->EnableLogTimeAutoAdjust()) {
+        logtime += GetTimeDelta();
+    }
+    event->SetTimestamp(logtime);
+    event->SetContentNoCopy(DEFAULT_CONTENT_KEY, logBuffer->rawBuffer);
+    event->SetPosition(logBuffer->readOffset, logBuffer->readLength);
+
+    return group;
 }
 
 #ifdef APSARA_UNIT_TEST_MAIN
