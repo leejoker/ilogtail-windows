@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 
+#include "common/EncodingConverter.h"
 #include "common/Lock.h"
 #include "common/LogRunnable.h"
 #include "common/Thread.h"
